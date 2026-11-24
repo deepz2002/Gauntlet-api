@@ -29,20 +29,28 @@ docker compose version
 ```
 
 Keep Docker Desktop running while using PostgreSQL. Run the following setup commands
-from the repository root (`Gauntlet-api` in this workspace). This is one Git
-repository containing both applications:
+from the repository root (`Gauntlet-api` in this workspace). This API repository links the separate frontend repository as a pinned Git
+submodule:
 
 ```text
 Gauntlet-api/
 ├── app/                   # FastAPI and scanner
-├── frontend/              # React, TypeScript and Tailwind
+├── frontend/              # Git submodule: deepz2002/Gauntlet-ui
 ├── .github/workflows/ci.yml
 ├── docker-compose.yml
 └── DEPLOY.md
 ```
 
 The previous local `Gauntlet-ui` path is a compatibility symlink to `frontend/`;
-a fresh clone needs only this repository.
+clone the API together with its frontend submodule:
+
+```sh
+git clone --recurse-submodules https://github.com/deepz2002/Gauntlet-api.git
+cd Gauntlet-api
+```
+
+For an existing clone, run `git submodule update --init --recursive` before building.
+CI checks out the pinned frontend commit automatically.
 
 Choose **one** execution mode below.
 
@@ -435,17 +443,18 @@ The workflow uses the maintained official [checkout](https://github.com/actions/
 [setup-node](https://github.com/actions/setup-node) actions. It runs tests on Python
 3.12 and Node 22.19.0, matching the application image versions.
 
-The repository is initialized locally on `main`. No remote repository has been set
-and no GitHub Actions run has been claimed as successful. These fields are left
-blank for manual completion:
+The API repository tracks `origin/main`; the frontend has its own `origin/main`.
+No GitHub Actions run has yet been verified as successful. The run link remains
+blank until a green run is confirmed:
 
 | Submission field | Value |
 | --- | --- |
-| GitHub repository URL | |
+| GitHub repository URL | https://github.com/deepz2002/Gauntlet-api |
 | Successful CI run for the final commit | |
 
-To publish manually, create an empty GitHub repository, add its URL as `origin`,
-and run `git push -u origin main`. Open its Actions tab and wait for all three jobs
+To publish further API changes, commit them on `main` and run `git push`.
+For frontend changes, commit and push inside `frontend/`, then commit its updated
+submodule reference in the API repository. Open its Actions tab and wait for all three jobs
 to pass. If anything fails, inspect the failed step, fix it, and push again. Verify
 that the green run belongs to the latest commit before adding its link above.
 
