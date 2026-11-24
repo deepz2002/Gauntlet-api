@@ -43,18 +43,21 @@ describes how the tool was used to realize them.
 
 ## Time spent by phase
 
-Developer estimates have not yet been supplied. Enter the approximate active time
-actually spent, rather than treating elapsed chat time as development time.
+The developer reported approximately one hour of active work for each phase below,
+for a total of approximately seven hours. These are retrospective developer estimates,
+not automatically measured timings.
 
 | Phase | Actual time / developer estimate |
 | --- | --- |
-| Requirements and planning | |
-| Database and migrations | |
-| Scanner and ten security checks | |
-| REST APIs and persistence | |
-| Frontend and integration | |
-| Testing and verification | |
-| Docker, CI and documentation | |
+| Requirements and planning | Approximately 1 hour |
+| Database and migrations | Approximately 1 hour |
+| Scanner and ten security checks | Approximately 1 hour |
+| REST APIs and persistence | Approximately 1 hour |
+| Frontend and integration | Approximately 1 hour |
+| Testing and verification | Approximately 1 hour |
+| Docker, CI and documentation | Approximately 1 hour |
+
+**Total: approximately 7 hours.**
 
 ## Reviewer access and submission
 

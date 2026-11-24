@@ -477,8 +477,8 @@ automated tests, lint/type checks, real PostgreSQL operations, Docker builds and
 browser/API smoke scans.
 
 [DEVELOPMENT_NOTES.md](DEVELOPMENT_NOTES.md) records the supplied direction, coding
-assistance by area, verification evidence and per-phase time estimates. The time
-fields await the developer's actual estimates. [DEPLOY.md](DEPLOY.md) contains the
+assistance by area, verification evidence and per-phase time estimates. I estimate
+approximately one hour per phase, seven hours in total. [DEPLOY.md](DEPLOY.md) contains the
 AWS production deployment design; no cloud deployment was performed.
 
 ## Documentation and submission status
@@ -488,7 +488,7 @@ AWS production deployment design; no cloud deployment was performed.
 | README | Setup, Mermaid schema, ten rules, architecture, tests and limitations documented |
 | DEPLOY.md | AWS design, OIDC, operations and read-only scanner permissions documented |
 | AI usage | Disclosed above and in DEVELOPMENT_NOTES.md |
-| Time spent by phase | Awaiting actual developer estimates |
+| Time spent by phase | Developer-reported estimate: approximately 1 hour per phase, 7 hours total; see DEVELOPMENT_NOTES.md |
 | Successful CI linked | Verified implementation run and latest-main workflow linked above |
 | Secrets and generated files | Local env/dependency/build files ignored; staged-file credential-pattern review completed |
 | Reviewer access | API and frontend repositories verified public |
