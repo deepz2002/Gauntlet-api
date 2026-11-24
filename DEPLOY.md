@@ -8,9 +8,8 @@ production authentication would be additional implementation work.
 
 Run the existing API and frontend images on ECS Fargate behind an HTTPS Application
 Load Balancer with ACM certificates. Route `/api/*` to the API and other paths to the
-frontend. Replace the frontend's Compose-only `api` upstream with ECS service discovery
-or a production Nginx configuration; Docker service names do not resolve automatically
-on ECS. Keep tasks and encrypted RDS PostgreSQL in private subnets across two AZs.
+frontend. Configure the separately deployed frontend with the public HTTPS API URL and
+allow its origin in API CORS settings. Keep tasks and encrypted RDS PostgreSQL in private subnets across two AZs.
 Allow database connections only from the API security group, and application traffic
 only from the load balancer. Publish no database/Adminer ports; Adminer is development-only.
 Use controlled egress or VPC endpoints for ECR, logs and secrets. Enable automated RDS

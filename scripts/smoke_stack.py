@@ -7,7 +7,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from uuid import uuid4
 
-BASE = os.environ.get("SMOKE_BASE_URL", "http://127.0.0.1:3000").rstrip("/")
+BASE = os.environ.get("SMOKE_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
 
 
 def request(path: str, body: dict | None = None) -> tuple[int, object]:
@@ -24,8 +24,8 @@ def request(path: str, body: dict | None = None) -> tuple[int, object]:
 
 
 def main() -> None:
-    with urlopen(BASE, timeout=10) as response:
-        assert response.status == 200 and b"Mini Gauntlet" in response.read()
+    with urlopen(BASE + "/docs", timeout=10) as response:
+        assert response.status == 200
     assert request("/api/health") == (200, {"status": "ok"})
     status, catalog = request("/api/checks")
     assert status == 200 and len(catalog) == 10

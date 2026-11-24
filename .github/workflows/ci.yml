@@ -38,7 +38,6 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-          submodules: true
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
@@ -59,50 +58,22 @@ jobs:
           alembic upgrade head
           alembic check
 
-  frontend:
-    name: Frontend lint, types, tests and build
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-          submodules: true
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '22.19.0'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
-      - name: ESLint
-        run: npm run lint
-      - name: TypeScript
-        run: npm run typecheck
-      - name: Component and API transport tests
-        run: npm test
-      - name: Production build
-        run: npm run build
-
   containers:
-    name: Build both images and test Compose startup
-    needs: [backend, frontend]
+    name: Build API image and test backend startup
+    needs: [backend]
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-          submodules: true
-      - name: Validate Compose and build the production Dockerfiles
+      - name: Validate Compose and build the API image
         run: |
           docker compose config --quiet
-          docker compose build api frontend
-      - name: Start the complete stack with an empty database volume
+          docker compose build api
+      - name: Start API, PostgreSQL and Adminer with an empty database volume
         run: docker compose up -d --wait --wait-timeout 120
-      - name: Verify automatic migrations and a real scan through the frontend proxy
+      - name: Verify automatic migrations and a real API scan
         run: python3 scripts/smoke_stack.py
       - name: Container logs on failure
         if: failure()

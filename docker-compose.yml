@@ -36,20 +36,6 @@ services:
       db:
         condition: service_healthy
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: ""
-    container_name: gauntlet-frontend
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:3000:8080"
-    depends_on:
-      api:
-        condition: service_healthy
-
   adminer:
     image: adminer:5.5.1
     container_name: gauntlet-adminer

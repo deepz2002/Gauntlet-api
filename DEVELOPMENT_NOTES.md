@@ -64,8 +64,8 @@ not automatically measured timings.
 - API: https://github.com/deepz2002/Gauntlet-api
 - Frontend: https://github.com/deepz2002/Gauntlet-ui
 - Both repositories were verified as public; reviewers can inspect them without
-  invitations. The API pins the frontend as a submodule.
-- Clone with `git clone --recurse-submodules https://github.com/deepz2002/Gauntlet-api.git`.
+  invitations. The API and frontend are independent repositories.
+- Clone with `git clone https://github.com/deepz2002/Gauntlet-api.git`.
 - Environment files, local dependencies, build output and browser artifacts are
   excluded from version control. A staged-file review found no common private-key,
   AWS access-key or GitHub-token patterns. The Compose password is fictional

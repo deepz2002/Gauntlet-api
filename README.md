@@ -13,7 +13,7 @@ them to the React frontend. No live cloud account or credentials are required.
 - Python 3.12 for local development. Python is not needed on the host if the API
   runs entirely inside Docker.
 - Node.js 22 and npm only for local frontend development. Docker builds the frontend
-  itself; see [frontend setup](frontend/README.md).
+  itself; see [frontend setup](https://github.com/deepz2002/Gauntlet-ui).
 
 On macOS with Homebrew, install Python if needed:
 
@@ -31,36 +31,21 @@ docker compose version
 ```
 
 Keep Docker Desktop running while using PostgreSQL. Run the following setup commands
-from the repository root (`Gauntlet-api` in this workspace). This API repository links the separate frontend repository as a pinned Git
-submodule:
-
-```text
-Gauntlet-api/
-├── app/                   # FastAPI and scanner
-├── frontend/              # Git submodule: deepz2002/Gauntlet-ui
-├── .github/workflows/ci.yml
-├── docker-compose.yml
-└── DEPLOY.md
-```
-
-The previous local `Gauntlet-ui` path is a compatibility symlink to `frontend/`;
-clone the API together with its frontend submodule:
+from the API repository root (`Gauntlet-api` in this workspace). The frontend is
+maintained separately in [Gauntlet-ui](https://github.com/deepz2002/Gauntlet-ui).
+There is no frontend folder or Git submodule in this API repository.
 
 ```sh
-git clone --recurse-submodules https://github.com/deepz2002/Gauntlet-api.git
+git clone https://github.com/deepz2002/Gauntlet-api.git
 cd Gauntlet-api
 ```
 
-For an existing clone, run `git submodule update --init --recursive` before building.
-CI checks out the pinned frontend commit automatically.
-
 Choose **one** execution mode below.
 
-## Option A: run the entire application in Docker
+## Option A: run the backend in Docker
 
-No local Python/Node installation, virtual environment, npm install or manual
-migration command is required for this option. Stop any local dev servers using
-ports 3000 or 8000 first.
+No local Python installation or manual migration command is required for this
+option. Stop any local API process using port 8000 first.
 
 ```sh
 docker compose up --build -d --wait
@@ -68,32 +53,23 @@ docker compose ps
 curl http://localhost:8000/api/health
 ```
 
-Compose starts PostgreSQL, the API, the production frontend and Adminer. The API
-waits for PostgreSQL and applies migrations; the frontend waits for the API health
-check. Open **http://localhost:3000**. API health returns `{"status":"ok"}`.
+Compose starts PostgreSQL, the API and Adminer. The API waits for PostgreSQL,
+applies pending migrations, then starts Uvicorn. API health returns `{"status":"ok"}`.
+Run the frontend separately and configure its backend URL in the supplied frontend
+environment file. The API's CORS origins must include the frontend's browser origin.
 
-The frontend uses a multi-stage Dockerfile: Node builds the app, then non-root Nginx
-serves only the compiled files. `/api/` requests are proxied to `api:8000` internally,
-so the browser uses one origin and does not need a Docker-specific `.env` file.
-
-| Service / build stage | Pinned image | Runtime user |
+| Service | Pinned image | Runtime user |
 | --- | --- | --- |
 | API | `python:3.12.12-slim-bookworm` | `gauntlet` |
-| Frontend builder | `node:22.19.0-alpine` | Build stage only |
-| Frontend runtime | `nginxinc/nginx-unprivileged:1.28.0-alpine` | `101:101` |
 | PostgreSQL | `postgres:16.16-alpine` | Managed by the PostgreSQL image |
 | Adminer | `adminer:5.5.1` | Managed by the Adminer image |
 
-Both application directories have `.dockerignore` files excluding local dependencies,
-build output and environment files. All four containers have health checks. The
-PostgreSQL named volume keeps data across restarts; application image rebuilds do
-not reset it. Final application images contain no frontend build toolchain.
+The backend has a `.dockerignore` file, health checks and a persistent PostgreSQL
+volume. Image rebuilds do not reset database data.
 
 ```sh
-# Inspect health, logs and runtime users:
 docker compose ps
-docker compose logs --tail=100 frontend api
-docker compose exec frontend id
+docker compose logs --tail=100 api
 docker compose exec api id
 ```
 
@@ -101,11 +77,11 @@ docker compose exec api id
 
 ### 1. Start the database
 
-Stop the container applications if you previously used Option A; this frees ports
-8000 and 3000 for local development. PostgreSQL itself still runs in Docker.
+Stop the API container if you previously used Option A; this frees port 8000
+for local Uvicorn. PostgreSQL itself still runs in Docker.
 
 ```sh
-docker compose stop api frontend
+docker compose stop api
 docker compose up -d --wait db adminer
 docker compose ps
 docker compose exec db pg_isready -U gauntlet -d gauntlet
@@ -171,7 +147,7 @@ container APIs simultaneously.
 | API health | http://localhost:8000/api/health |
 | OpenAPI schema | http://localhost:8000/openapi.json |
 | Adminer database viewer | http://localhost:8080 |
-| Frontend | http://127.0.0.1:3000 |
+| Frontend (run separately) | http://127.0.0.1:3000 |
 
 For Adminer, select **PostgreSQL**, not MySQL/MariaDB, and use `db` as the server.
 Use the database name, username and password supplied separately with the environment
@@ -420,15 +396,16 @@ repository permissions and requires no cloud secrets:
 
 1. Backend: install dependencies, run Ruff/format checks and all Pytest tests against
    PostgreSQL, then apply migrations and check for schema drift.
-2. Frontend: `npm ci`, ESLint with zero warnings, TypeScript, Vitest and production build.
-3. Containers: build both production Dockerfiles, start the complete stack with a
-   fresh runner volume, and run `scripts/smoke_stack.py` through the frontend proxy.
-   Container logs are printed on failure; the runner's temporary stack is cleaned up.
+2. Containers: build the API image, start the backend stack with a fresh runner
+   volume, and run `scripts/smoke_stack.py` directly against FastAPI.
 
-The workflow uses the maintained official [checkout](https://github.com/actions/checkout),
-[setup-python](https://github.com/actions/setup-python), and
-[setup-node](https://github.com/actions/setup-node) actions. It runs tests on Python
-3.12 and Node 22.19.0, matching the application image versions.
+Frontend lint, type checks, tests and image builds run in the separate frontend
+repository's workflow. Container logs are printed on failure; the runner's temporary
+stack is cleaned up.
+
+The workflow uses the official [checkout](https://github.com/actions/checkout) and
+[setup-python](https://github.com/actions/setup-python) actions. It uses Python 3.12,
+matching the API image.
 
 The API repository tracks `origin/main`; the frontend has its own `origin/main`.
 Both repositories are public. The implementation commit has a verified successful
@@ -442,8 +419,8 @@ GitHub Actions run; the badge above links to the latest main-branch runs.
 | Frontend repository | https://github.com/deepz2002/Gauntlet-ui |
 
 To publish further API changes, commit them on `main` and run `git push`.
-For frontend changes, commit and push inside `frontend/`, then commit its updated
-submodule reference in the API repository. Open its Actions tab and wait for all three jobs
+For frontend changes, commit and push in the separate `Gauntlet-ui` directory.
+Open the API Actions tab and wait for both backend jobs
 to pass. If anything fails, inspect the failed step, fix it, and push again. Verify
 that the green run belongs to the latest commit before adding its link above.
 
