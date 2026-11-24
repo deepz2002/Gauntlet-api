@@ -124,25 +124,14 @@ includes the application dependencies, Alembic, Pytest and Ruff.
 
 ### 3. Configure the environment
 
-Copy the template on first setup only; do not overwrite an existing `.env`:
-
-```sh
-cp .env.example .env
-```
-
-The local `.env` should contain:
-
-```dotenv
-DATABASE_URL=postgresql+psycopg://gauntlet:local_dev_password@localhost:5432/gauntlet
-CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-INVENTORY_PATH=data/inventory.json
-SCAN_WORKER_LIMIT=4
-```
+Save the environment file provided separately by email as `.env` in the repository
+root. Preserve any existing local configuration. Environment values are not included
+in this README; do not commit the supplied file to Git.
 
 - Use `localhost` for a Python process on your Mac. Compose sets `db` as the
   hostname for the API container, because containers communicate by service name.
 - Environment variables exported in your shell override `.env` values.
-- The provided password is for local development. `.env` is ignored by Git and Docker.
+- `.env` is ignored by Git and Docker.
 - `INVENTORY_PATH` selects the input file; do not change the assignment inventory.
 - `SCAN_WORKER_LIMIT` accepts 1–64 workers and defaults to four.
 
@@ -184,15 +173,9 @@ container APIs simultaneously.
 | Adminer database viewer | http://localhost:8080 |
 | Frontend | http://127.0.0.1:3000 |
 
-For Adminer, log in with:
-
-| Field | Value |
-| --- | --- |
-| System | **PostgreSQL**, not MySQL/MariaDB |
-| Server | `db` |
-| Username | `gauntlet` |
-| Password | `local_dev_password` |
-| Database | `gauntlet` |
+For Adminer, select **PostgreSQL**, not MySQL/MariaDB, and use `db` as the server.
+Use the database name, username and password supplied separately with the environment
+configuration.
 
 Choose the `public` schema to see the tables. Adminer uses `db` because it is a
 container. Desktop database clients use host `localhost`, port `5432`, and the same
@@ -201,7 +184,7 @@ credentials. You do not need a separate Postgres.app server.
 To inspect the database from a terminal:
 
 ```sh
-docker compose exec db psql -U gauntlet -d gauntlet
+docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
 ```
 
 Inside `psql`:
@@ -382,10 +365,12 @@ saved in your checkout. `alembic check` detects model/migration drift.
 ruff check .
 ruff format --check .
 python -m pytest -q
-# Include PostgreSQL tests in temporary schemas; keep the database running:
-TEST_DATABASE_URL=postgresql+psycopg://gauntlet:local_dev_password@localhost:5432/gauntlet python -m pytest -q
 docker compose config --quiet
 ```
+
+To include PostgreSQL integration tests, keep the database running and set
+`TEST_DATABASE_URL` to the database connection supplied separately before running
+Pytest. Without it, those integration tests are skipped.
 
 Tests cover all ten checks, malformed input, network edge cases, key-age boundaries,
 concurrency, scoring, schema constraints/migrations, API validation/filtering/pagination,
@@ -414,7 +399,7 @@ credentials does not update users/passwords in an existing volume.
 | FastAPI database startup failure | Start `db`, run `python -m app.db.check`, and verify the local URL uses `localhost`; check for a shell `DATABASE_URL` override. |
 | Port 5432 already in use | Stop the separate local PostgreSQL/Postgres.app server if Docker should own this port. |
 | Port 8000 already in use | Run either the local API or the container API, not both. |
-| Adminer connection refused | Select PostgreSQL, server `db`, and the credentials above; confirm `db` is healthy. |
+| Adminer connection refused | Select PostgreSQL, server `db`, and the separately supplied credentials; confirm `db` is healthy. |
 | Tables missing | Run `alembic upgrade head` locally, or rebuild/start the API container. |
 | Browser cannot reach API | Start FastAPI on 8000 and confirm the frontend origin is in `CORS_ORIGINS`. |
 
