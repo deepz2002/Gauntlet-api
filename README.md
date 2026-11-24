@@ -1,5 +1,7 @@
 # Mini Gauntlet API
 
+[![CI](https://github.com/deepz2002/Gauntlet-api/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/deepz2002/Gauntlet-api/actions/workflows/ci.yml?query=branch%3Amain)
+
 FastAPI backend for an inventory-based cloud security scanner. It runs ten checks
 across AWS, Azure and Google Cloud, stores scan results in PostgreSQL, and serves
 them to the React frontend. No live cloud account or credentials are required.
@@ -423,7 +425,7 @@ flow and local Docker setup are implemented. Authentication and live cloud colle
 are not included. CI is configured in `.github/workflows/ci.yml`; production deployment
 is described in `DEPLOY.md`.
 Production multi-worker execution needs durable jobs and coordination; this version
-uses one API process. AI coding assistance was used for implementation and verification.
+uses one API process. AI coding assistance is disclosed below.
 
 ## Continuous integration and GitHub submission
 
@@ -444,13 +446,15 @@ The workflow uses the maintained official [checkout](https://github.com/actions/
 3.12 and Node 22.19.0, matching the application image versions.
 
 The API repository tracks `origin/main`; the frontend has its own `origin/main`.
-No GitHub Actions run has yet been verified as successful. The run link remains
-blank until a green run is confirmed:
+Both repositories are public. The implementation commit has a verified successful
+GitHub Actions run; the badge above links to the latest main-branch runs.
 
 | Submission field | Value |
 | --- | --- |
 | GitHub repository URL | https://github.com/deepz2002/Gauntlet-api |
-| Successful CI run for the final commit | |
+| Verified CI run (implementation commit `99cbdf5`) | [Successful run](https://github.com/deepz2002/Gauntlet-api/actions/runs/45463038051) |
+| Latest main-branch CI | [Current runs](https://github.com/deepz2002/Gauntlet-api/actions/workflows/ci.yml?query=branch%3Amain) |
+| Frontend repository | https://github.com/deepz2002/Gauntlet-ui |
 
 To publish further API changes, commit them on `main` and run `git push`.
 For frontend changes, commit and push inside `frontend/`, then commit its updated
@@ -458,7 +462,34 @@ submodule reference in the API repository. Open its Actions tab and wait for all
 to pass. If anything fails, inspect the failed step, fix it, and push again. Verify
 that the green run belongs to the latest commit before adding its link above.
 
-See [DEPLOY.md](DEPLOY.md) for the AWS deployment design and
-[DEVELOPMENT_NOTES.md](DEVELOPMENT_NOTES.md) for AI usage and the actual-time log.
-Time estimates were not recorded; the developer's real per-phase estimates must
-be entered before submission rather than fabricated.
+## AI coding assistance
+
+The ten security rules and inventory are defined by the assignment. I supplied
+those requirements together with my development approach, technology choices and
+intended application behavior. I used **OpenAI Codex as a coding tool** to translate
+that specification into the scanner, API, database models/migrations and React UI,
+and to assist with tests, debugging, Docker and CI configuration.
+
+I directed the interface through iterative requirements, including scanning all
+cloud accounts automatically, skeleton loading, collapsible history and the API
+activity drawer. AI assisted with implementation across these modules. Verification included
+automated tests, lint/type checks, real PostgreSQL operations, Docker builds and
+browser/API smoke scans.
+
+[DEVELOPMENT_NOTES.md](DEVELOPMENT_NOTES.md) records the supplied direction, coding
+assistance by area, verification evidence and per-phase time estimates. The time
+fields await the developer's actual estimates. [DEPLOY.md](DEPLOY.md) contains the
+AWS production deployment design; no cloud deployment was performed.
+
+## Documentation and submission status
+
+| Item | Status / evidence |
+| --- | --- |
+| README | Setup, Mermaid schema, ten rules, architecture, tests and limitations documented |
+| DEPLOY.md | AWS design, OIDC, operations and read-only scanner permissions documented |
+| AI usage | Disclosed above and in DEVELOPMENT_NOTES.md |
+| Time spent by phase | Awaiting actual developer estimates |
+| Successful CI linked | Verified implementation run and latest-main workflow linked above |
+| Secrets and generated files | Local env/dependency/build files ignored; staged-file credential-pattern review completed |
+| Reviewer access | API and frontend repositories verified public |
+| Email submission | Not performed |
